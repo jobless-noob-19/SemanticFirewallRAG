@@ -9,12 +9,12 @@ logger=get_logger("chroma_manager","chroma_manager.log")
 
 class ChromaManager:
     """
-    Handles creation, loadingm updatingm and querying of the persistant Chroma vector database
+    Handles creation, loading updating and querying of the persistant Chroma vector database
     """
 
     def __init__(self, persist_directory:str = "vector_db/chroma_db"):
         self.persist_directory=Path(persist_directory)
-
+        self.collection_name="semantic_firewall"
         self.embedding_service=EmbeddingService()
         self.embedding_model=self.embedding_service.get_embedding_model()
 
@@ -29,7 +29,7 @@ class ChromaManager:
         logger.info(f"Total chunks to add: {len(documents)}")
 
         self.db=Chroma(
-            collection_name="semantic_firewall",
+            collection_name=self.collection_name,
             embedding_function=self.embedding_model,
             persist_directory=str(self.persist_directory),
         )
@@ -59,10 +59,11 @@ class ChromaManager:
         """Loads an existing """
         logger.info("Loading Chroma database...")
         self.db=Chroma(
+            collection_name=self.collection_name,
             persist_directory=str(self.persist_directory),
             embedding_function=self.embedding_model,
             )
-        logger.info("Database loaaded successfully.")
+        logger.info("Database loaded successfully.")
         return self.db
 
     def add_documents(self,documents:List[Document]):
@@ -79,6 +80,13 @@ class ChromaManager:
             self.load_database()
         logger.info(f"Running similarity search: {query}")
         return self.db.similarity_search(query,k=k)
+
+    def similarity_search_with_score(self,query: str, k: int=5):
+            """Return the top-k most similar documents with similarity score."""
+            if self.db is None:
+                self.load_database()
+            logger.info(f"Running similarity search with score: {query}")
+            return self.db.similarity_search_with_score(query,k=k)    
     
     def get_retriever(self,k: int=5):
         """Returns a LangChain retriever."""
