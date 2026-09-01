@@ -56,7 +56,7 @@ class Retriever:
         """
 
         documents=self.retrieve(query)
-        result=[]
+        results=[]
         for document in documents:
             results.append(
                 {
