@@ -64,7 +64,7 @@ class Retriever:
                     "metadata": document.metadata
                 }
             )
-            return results
+        return results
 
     def get_langchain_retriever(self):
         """Return the underlying LangChain retriever."""
